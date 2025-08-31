@@ -8,7 +8,8 @@ export class GroupRepository {
     
     try {
       const [groups] = await connection.query<RowDataPacket[]>(
-        `SELECT * FROM \`groups\` LIMIT ${parseInt(limit.toString())} OFFSET ${parseInt(offset.toString())}`
+        'SELECT * FROM `groups` LIMIT ? OFFSET ?',
+        [limit, offset]
       );
       
       const [countResult] = await connection.query<RowDataPacket[]>(

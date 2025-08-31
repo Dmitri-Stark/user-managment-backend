@@ -8,7 +8,8 @@ export class UserRepository {
     
     try {
       const [users] = await connection.query<RowDataPacket[]>(
-        `SELECT * FROM users LIMIT ${parseInt(limit.toString())} OFFSET ${parseInt(offset.toString())}`
+        'SELECT * FROM users LIMIT ? OFFSET ?',
+        [limit, offset]
       );
       
       const [countResult] = await connection.query<RowDataPacket[]>(
@@ -35,11 +36,22 @@ export class UserRepository {
     try {
       await connection.beginTransaction();
       
-      for (const update of updates) {
-        await connection.execute(
-          'UPDATE users SET status = ? WHERE id = ?',
-          [update.status, update.id]
-        );
+      const statusGroups = updates.reduce((acc, update) => {
+        if (!acc[update.status]) {
+          acc[update.status] = [];
+        }
+        acc[update.status].push(update.id);
+        return acc;
+      }, {} as Record<string, number[]>);
+      
+      for (const [status, userIds] of Object.entries(statusGroups)) {
+        if (userIds.length > 0) {
+          const placeholders = userIds.map(() => '?').join(',');
+          await connection.execute(
+            `UPDATE users SET status = ? WHERE id IN (${placeholders})`,
+            [status, ...userIds]
+          );
+        }
       }
       
       await connection.commit();
