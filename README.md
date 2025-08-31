@@ -42,3 +42,6 @@ PATCH http://localhost:3000/api/users/statuses
 - **API**: http://localhost:3000
 - **phpMyAdmin**: http://localhost:8080 (user/password)
 - **Test Data**: 100 users, 20 groups
+
+
+i have tried insert orm prisma but it require env file and i want it keep simple as it is so decided not to do that
